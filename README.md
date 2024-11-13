@@ -1,2 +1,2 @@
 # DataStructureAndAlgorithm
-This repository is created to store all the DSA related problems
+This repository has created to store all the DSA related problems
