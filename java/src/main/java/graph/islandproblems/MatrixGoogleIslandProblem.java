@@ -6,6 +6,7 @@ import java.util.Queue;
 public class MatrixGoogleIslandProblem {
 
     public int countValidLake(int[][] matrix, int inputX, int inputY) {
+        if (matrix[inputX][inputY] == 0) return 0; // Assumption : User always click on '1' otherwise return 0
         boolean[][] dfsVisited = new boolean[matrix.length][matrix[0].length];
 
         Queue<int[]> queue = new LinkedList<>();
@@ -36,7 +37,9 @@ public class MatrixGoogleIslandProblem {
         } else if ((x == 0 || x == matrix.length - 1 || y == 0 || y == matrix[0].length - 1) && matrix[x][y] == 0) {
             visited[x][y] = true;
             return false;
-        } else if (visited[x][y]) {
+        } else if (visited[x][y] && matrix[x][y] == -1) {  // if already visited & its result consider as FALSE/Invalid = consider it as failure
+            return false;
+        } else if (visited[x][y]) { // if already visited & it's "valid" since in-valid we've already checked above = consider it as "safe" to consider for success
             return true;
         }
         visited[x][y] = true;
@@ -51,8 +54,17 @@ public class MatrixGoogleIslandProblem {
         boolean rightColCell = upperRowCell && isPartOfValidLake(matrix, x,y+1, visited); // if all above results are true then only go for this check
         boolean leftColCell = rightColCell && isPartOfValidLake(matrix, x,y-1, visited); // if all above results are true then only go for this check
 
-        // all 4-direction is true --> it means, current cell ('0') is surrounded by '1'
-        return lowerRowCell && upperRowCell && rightColCell && leftColCell;
+        boolean upperLeftColCell = leftColCell && isPartOfValidLake(matrix, x-1,y-1, visited); // if all above results are true then only go for this check
+        boolean upperRightColCell = upperLeftColCell && isPartOfValidLake(matrix, x-1,y+1, visited); // if all above results are true then only go for this check
+        boolean lowerLeftColCell = upperRightColCell && isPartOfValidLake(matrix, x+1,y-1, visited); // if all above results are true then only go for this check
+        boolean lowerRightColCell = lowerLeftColCell && isPartOfValidLake(matrix, x+1,y+1, visited); // if all above results are true then only go for this check
+
+        // all 8-direction result is true --> it means, current cell ('0') is surrounded by '1' or qualify for good candidate of our final answer
+        boolean finalResult = lowerRowCell && upperRowCell && rightColCell && leftColCell && upperLeftColCell && upperRightColCell && lowerLeftColCell && lowerRightColCell;
+        if (!finalResult) {
+            matrix[x][y] = -1;
+        }
+        return finalResult;
     }
 
     public void dfs(int[][] matrix, int i, int j, Queue<int[]> queue, boolean[][] dfsVisited) {
